@@ -27,7 +27,7 @@ jobs:
       uses: actions/create-release@v1
       id: create_release
       env:
-        GITHUB_TOKEN: ${{ secrets.YGITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v${{ github.run_number }}
         release_name: Release ${{ github.run_number }}
@@ -36,7 +36,6 @@ jobs:
         draft: false
         prerelease: false
 
-      
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
