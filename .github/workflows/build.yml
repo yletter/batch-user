@@ -1,0 +1,58 @@
+name: Build Java JAR
+
+on:
+  push:
+    branches:
+      - main  # Adjust to the branch you want to trigger the build on
+  pull_request:
+    branches:
+      - main  # Adjust to the branch you want to trigger the build on
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Create Git Tag
+      run: |
+        git config --global user.name "yuvarajengineer"
+        git config --global user.email  yuvarajengineer@gmail.com
+        git tag -a v${{ github.run_number }} -m "Release version ${{ github.run_number }}"
+        git push origin v${{ github.run_number }}
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release ${{ github.run_number }}
+        body: |
+          Automated release created by GitHub Actions.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.YGITHUB_TOKEN }}
+      
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v2
+      with:
+        images: yuvarajengineer/batchuser
+      
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
