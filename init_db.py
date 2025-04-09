@@ -1,4 +1,5 @@
 import os
+import base64
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -10,6 +11,7 @@ MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD')
 
 DB_NAME = 'userdb'
 TABLE_NAME = 'users'
+FILE_PATH = '/config/recs.txt'
 
 TABLES = {
     TABLE_NAME: (
@@ -43,14 +45,27 @@ try:
         print(f"Creating table `{table_name}`...")
         cursor.execute(table_desc)
 
-    # Insert a row
-    cursor.execute(
-        f"INSERT INTO {TABLE_NAME} (name, email) VALUES (%s, %s)",
-        ("John Doe", "john@example.com")
-    )
+    # Read and decode the base64 file
+    if os.path.exists(FILE_PATH):
+        with open(FILE_PATH, 'rb') as file:
+            encoded_data = file.read()
 
-    cnx.commit()
-    print("Row inserted into table.")
+        decoded_text = base64.b64decode(encoded_data).decode('utf-8')
+
+        for line in decoded_text.strip().splitlines():
+            name_email = line.strip().split(',')
+            if len(name_email) == 2:
+                name, email = name_email
+                cursor.execute(
+                    f"INSERT INTO {TABLE_NAME} (name, email) VALUES (%s, %s)",
+                    (name.strip(), email.strip())
+                )
+            else:
+                print(f"Skipping invalid line: {line}")
+        cnx.commit()
+        print("All valid records inserted.")
+    else:
+        print(f"File not found: {FILE_PATH}")
 
 except mysql.connector.Error as err:
     print(f"Error: {err}")
