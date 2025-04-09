@@ -56,6 +56,7 @@ try:
             name_email = line.strip().split(',')
             if len(name_email) == 2:
                 name, email = name_email
+                print(f"Inserting record: name='{name}', email='{email}'")
                 cursor.execute(
                     f"INSERT INTO {TABLE_NAME} (name, email) VALUES (%s, %s)",
                     (name.strip(), email.strip())
