@@ -1,4 +1,4 @@
-name: Build Java JAR
+name: Build Python Batch Job
 
 on:
   push:
