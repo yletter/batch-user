@@ -49,7 +49,8 @@ try:
     if os.path.exists(FILE_PATH):
         with open(FILE_PATH, 'rb') as file:
             encoded_data = file.read()
-
+            print("Encoded file content:")
+            print(encoded_data)
         decoded_text = base64.b64decode(encoded_data).decode('utf-8')
 
         for line in decoded_text.strip().splitlines():
